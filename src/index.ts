@@ -1,9 +1,10 @@
 import express, { NextFunction, Request, Response } from "express";
 import { appRouter } from "./routes";
 import { AppDataSource } from "./DAL/config/db";
+import { appConfig } from "./consts";
 
 const app = express();
-const port = 3000;
+const port = appConfig.PORT;
 
 app.use(express.json())
 

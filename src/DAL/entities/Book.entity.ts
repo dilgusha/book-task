@@ -1,15 +1,28 @@
-import { BaseEntity, Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "./User.entity";
+import { BaseEntity, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Author } from "./Author.entites";
+import { Order } from "./Order.entites";
 
 @Entity("books")
 export class Book extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
     
-
     @Column()
     title: string;
 
-    @ManyToOne(() => User, (user) => user.books,{cascade:true})
-    user: User;
+    @Column()
+    price:string
+
+    @Column()
+    stock: number;
+
+    @Column()
+    soldCount: number;
+
+    @ManyToMany(() => Author, (author) => author.books)
+    authors: Author[];
+
+    @ManyToMany(() => Order, (order) => order.books)
+    orders: Order[];
+
 }

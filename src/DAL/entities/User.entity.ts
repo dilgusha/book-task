@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, BaseEntity, OneToMany } from "typeorm";
-import { Book } from "./Book.entity";
+import { Order } from "./Order.entites";
+import { UserRoles } from "../../shared/enum/user.enum";
 
 @Entity("users")
 export class User extends BaseEntity {
@@ -9,6 +10,16 @@ export class User extends BaseEntity {
     @Column()
     name: string;
 
-    @OneToMany(() => Book, (book) => book.user, { onDelete: 'CASCADE'})
-    books: Book[];
+    @Column()
+    email: string;
+
+    @Column()
+    password:string
+
+    @Column({type : "enum" , enum : UserRoles , default : UserRoles.USER})
+    role:UserRoles
+
+    @OneToMany(() => Order, (order) => order.user)
+    orders: Order[];
+
 }

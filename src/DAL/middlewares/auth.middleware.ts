@@ -1,58 +1,42 @@
-import jwt from 'jsonwebtoken'
-import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import { NextFunction, Response } from 'express';
 import { User } from '../entities/User.entity';
 import { AppDataSource } from '../config/db';
+import { AuthRequest } from '../../types';
 
 const jwtSecret = process.env.JWT_SECRET || 'defaultSecretKey';
 
-const userRepository = AppDataSource.getRepository(User);
+export const authorize = async (req: AuthRequest, res: Response, next: NextFunction):Promise<void> => {
+    const authHeader = req.headers["authorization"]; 
 
-const useAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    if (!req.headers.authorization) {
-        return next(res.status(401).json({
-            message: "Token tapılmadı"
-        }));
+    if (!authHeader) {
+         res.status(403).json({ message: "Authorization required" });
+         return
     }
-
-    const authHeader = req.headers.authorization;
 
     if (!authHeader.startsWith("Bearer ")) {
-        return next(res.status(403).json({
-            message: "Bearer token tələb olunur"
-        }));
+         res.status(403).json({ message: "Bearer token is required" });
+         return
     }
 
-    const token = authHeader.split(' ')[1];
-
+    const token = authHeader.split(" ")[1];
     if (!token) {
-        return next( res.status(403).json({
-            message: 'Bearer token tələb olunur'
-        }));
+         res.status(403).json({ message: "Bearer token is required" });
+         return
     }
 
     try {
-        const decoded = jwt.verify(token, jwtSecret) as { sub: string };
-
-        const user = await userRepository.findOne({
-            where: { id: +decoded.sub },
-        });
+        const decoded: any = jwt.verify(token, jwtSecret);
+        const user = await User.findOne({ where: { id: decoded.sub } });
 
         if (!user) {
-            return next( res.status(401).json({
-                message: "İstifadəçi tapılmadı!"
-            }));
-        }
+            res.status(401).json({ message: "User not found!" });
+            return
+        } 
 
-        req.user = user; // Adjust to match the `IUser` interface
-
-
+        req.user = user;
         next();
     } catch (error) {
-        return next( res.status(401).json({
-            message: "Etibarsız token",
-            error: error instanceof Error ? error.message : error
-        }));
+        res.status(401).json({ message: "Token not valid", error });
     }
 };
-
-export default useAuth;
