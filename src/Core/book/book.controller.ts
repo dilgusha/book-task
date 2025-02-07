@@ -3,13 +3,13 @@ import { validate } from "class-validator";
 import { Book } from "../../DAL/entities/Book.entity";
 import { formatErrors } from "../../utils/error.formatter";
 import { BookDto } from "./book.dto";
-import { UserRoles } from "../../shared/enum/user.enum";
+import { EUserRoles } from "../../shared/enum/user.enum";
 import { AuthRequest } from "../../types";
-import { Author } from "../../DAL/entities/Author.entites";
+import { Author } from "../../DAL/entities/Author.entity";
 
 const createBook = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        if (!req.user || req.user.role !== UserRoles.ADMIN) {
+        if (!req.user || req.user.role !== EUserRoles.ADMIN) {
             res.status(403).json({ message: "Forbidden: Only admins can create books" });
             return
         }
@@ -19,7 +19,6 @@ const createBook = async (req: AuthRequest, res: Response, next: NextFunction): 
         dto.price = price;
         dto.stock = stock;
         dto.authorIds = authorIds;
-
 
         const errors = await validate(dto);
         if (errors.length > 0) {
@@ -67,7 +66,7 @@ const getBookById = async (req: Request, res: Response, next: NextFunction) => {
 
 const deleteBook = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        if (!req.user || req.user.role !== UserRoles.ADMIN) {
+        if (!req.user || req.user.role !== EUserRoles.ADMIN) {
             return res.status(403).json({ message: "Forbidden: Only admins can delete books" });
         }
         const id = Number(req.params.id);
