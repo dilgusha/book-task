@@ -75,7 +75,7 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<v
       sub: user.id
     }
     const jwt_secret = appConfig.JWT_SECRET
-    
+
     const token = jwt.sign(payload, jwt_secret, { expiresIn: "1h" });
 
     res.status(200).json({ message: "Login successful", token });
@@ -84,7 +84,23 @@ const login = async (req: Request, res: Response, next: NextFunction): Promise<v
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+const getUserPurchasedBooks = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findOne({ where: { id: Number(id) }, relations: ["purchasedBooks"] });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return
+    }
+    res.status(200).json(user.purchasedBooks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 export const UserController = {
   register,
-  login
+  login,
+  getUserPurchasedBooks
 };
